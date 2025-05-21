@@ -1,0 +1,45 @@
+## TEXT
+
+ffmpeg -i input1.mp4 -vf "
+drawtext=text='Codec: MJPEG/FLAC':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:
+fontcolor=white:fontsize=60:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0,5)':box=1:boxcolor=black@0.5:boxborderw=10,
+
+drawtext=text='Nguyễn Diệu My':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:
+fontcolor=white:fontsize=28:x='mod(100*t\,w+text_w)-text_w':y=h-50:enable='between(t,6,32)':box=1:boxcolor=black@0.5:boxborderw=5,
+
+drawtext=text='Ngô Thu Thảo':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:
+fontcolor=white:fontsize=28:x='mod(100*(t-33)\,w+text_w)-text_w':y=h-50:enable='between(t,33,61)':box=1:boxcolor=black@0.5:boxborderw=5,
+
+drawtext=text='Nguyễn Thị Thu Hà':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:
+fontcolor=white:fontsize=28:x='mod(100*(t-62)\,w+text_w)-text_w':y=h-50:enable='between(t,62,91)':box=1:boxcolor=black@0.5:boxborderw=5,
+
+drawtext=text='Trần Nguyễn Hà Lan':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:
+fontcolor=white:fontsize=28:x='mod(100*(t-92)\,w+text_w)-text_w':y=h-50:enable='between(t,92,118)':box=1:boxcolor=black@0.5:boxborderw=5,
+
+drawtext=text='Bùi Nam Dương':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:
+fontcolor=white:fontsize=28:x='mod(100*(t-119)\,w+text_w)-text_w':y=h-50:enable='between(t,119,171)':box=1:boxcolor=black@0.5:boxborderw=5,
+
+drawtext=text='Thanks for watching':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:
+fontcolor=yellow:fontsize=60:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,172,182)':box=1:boxcolor=black@0.5:boxborderw=10,
+
+format=yuv420p,scale=1280:720
+" -c:v libx264 -c:a copy -preset slow input1_graphic_text.mp4
+
+##   MOTION IMAGE
+
+ffmpeg -i input1_graphic_text.mp4 -i star.avif -filter_complex "
+[1:v] scale=iw/8:ih/8, colorkey=white:0.3:0.0 [star_scaled];
+[0:v][star_scaled] overlay=
+  x='if(between(t\,0\,180), (W-w)/2 + (W-w)/2 * sin(2*PI*t/15), NAN)':
+  y='if(between(t\,0\,180), (H-h)/2 + (H-h)/2 * sin(2*PI*t/7), NAN)':
+  enable='between(t\,0\,180)'
+" -pix_fmt yuv420p -c:v libx264 -c:a copy -preset slow output_star4.mp4
+
+
+##   VIDEO
+
+ffmpeg -i output_star4.mp4 -i effect_182s.webm -filter_complex "
+[1:v] format=yuva420p, colorkey=black:0.3:0.0 [snow];
+[0:v][snow] overlay=0:0:enable='between(t,0,182)'
+" -pix_fmt yuv420p -c:v libx264 -c:a aac -preset slow final_output2.mp4
+
